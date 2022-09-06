@@ -1,0 +1,26 @@
+/**
+ * @param {number[][]} edges
+ * @return {number[]}
+ */
+var findRedundantConnection = function(edges) {
+    const n = edges.length;
+    const fa = [];
+    for (let i = 0; i < n; i++) fa[i] = i;
+    var find = function(x) {
+        if (fa[x] === x) return x;
+        return fa[x] = find(fa[x]);
+    }
+
+    var unionSet = function(x, y) {
+        x = find(x);
+        y = find(y);
+        if (x !== y) fa[x] = y; 
+    }
+    for (let i=0; i<n; i++) {
+        const edge = edges[i];
+        const node1 = edge[0];
+        const node2 = edge[1];
+        if (find(node1) !== find(node2)) unionSet(node1, node2);
+        else return edge;
+    }
+};
