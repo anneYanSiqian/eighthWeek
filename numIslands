@@ -1,0 +1,105 @@
+/**
+ * @param {character[][]} grid
+ * @return {number}
+ */
+class UnionFind {
+    constructor(n) { //构造一个节点数为n的集合
+        this.count = n //并查集总数
+        this.fa = new Array(n)
+        this.size = new Array(n)  // size数组记录着每棵树的重量
+        for (let i = 0; i < n; i++) {
+            this.fa[i] = i; // 自己是自己的fa
+            this.size[i] = 1;	//每个集合上节点的数量
+        }
+    }
+
+    union(p, q) { //连通结点p和结点q, p和q都是索引
+        let rootP = this.find(p);
+        let rootQ = this.find(q);
+        if (rootP === rootQ) return
+        // 元素数量小的接到数量多的下面，这样比较平衡
+        if (this.size[rootP] > this.size[rootQ]) {
+            this.fa[rootQ] = rootP;
+            this.size[rootP] += this.size[rootQ];
+        } else {
+            this.fa[rootP] = rootQ;
+            this.size[rootQ] += this.size[rootP];
+        }
+        this.count--;
+    }
+
+    find(x) { //找到x结点的root
+        if (this.fa[x] === x) return x;
+        return this.find(this.fa[x]);
+    }
+
+    getCount() { //返回子集个数
+        return this.count;
+    }
+
+}
+var numIslands = function(grid) {
+    /**bfs
+    const m = grid.length;
+    const n = grid[0].length;
+    const visited = [];
+    for (let i=0; i<m; i++) {
+        visited.push(new Array(n).fill(false));
+    }
+    const dx = [-1, 0, 0 ,1];
+    const dy = [0, -1, 1, 0];
+    var bfs = function(sx, sy) {
+        const q = [];
+        q.push([sx, sy]);
+        visited[sx][sy] = true;
+        while (q.length) {
+            const temp = q.pop();
+            const x = temp[0];
+            const y = temp[1];
+            for (let i=0; i<4; i++) {
+                const nx = x + dx[i];
+                const ny = y + dy[i];
+                if (nx<0 || nx>=m || ny<0 || ny>=n) continue;
+                if (grid[nx][ny] !== '1') continue;
+                if (visited[nx][ny]) continue;
+                q.push([nx, ny]);
+                visited[nx][ny] = true;
+            }
+        }
+    }
+    let ans = 0;
+    for (let i=0; i<m; i++) {
+        for (let j=0; j<n; j++) {
+            if (grid[i][j] === '1' && !visited[i][j]) {
+                ans++;
+                bfs(i, j);
+            }
+        } 
+    }
+    return ans;
+     */
+    let m = grid.length
+    if (m === 0) return 0
+    let n = grid[0].length
+    const dummy = -1
+    const dx = [1, 0];
+    const dy = [0, 1];
+    const uf = new UnionFind(m * n)
+    for (let x = 0; x < m; x++) {
+        for (let y = 0; y < n; y++)
+            if (grid[x][y] === '0') {//如果网格是0，则和dummy合并
+                uf.union(n * x + y, dummy) 
+            }
+            else if (grid[x][y] === '1') {//如果网格是1，则向右 向下尝试
+                for (let i=0; i<2; i++) {
+                    let nx = x + dx[i]
+                    let ny = y + dy[i]
+                    if (nx >= m || ny >= n) continue //坐标合法性
+                    if (grid[nx][ny] === '1') { //当前网格的右边 下面如果是1，则和当前网格合并
+                        uf.union(n * x + y, n * nx + ny)
+                    }
+                }
+            }
+    }
+    return uf.getCount()  //返回并查集的个数减一就行
+};
